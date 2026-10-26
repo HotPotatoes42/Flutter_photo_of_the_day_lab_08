@@ -8,8 +8,10 @@ class PhotoPage extends StatefulWidget {
   const PhotoPage({super.key});
 
   @override
-  State<PhotoPage> createState() => _PhotoPageState();
+  State<PhotoPage> createState() =>
+      _PhotoPageState();
 }
+
 class _PhotoPageState extends State<PhotoPage> {
   String? _imageUrl;
   bool _isLoading = false;
@@ -21,27 +23,32 @@ class _PhotoPageState extends State<PhotoPage> {
       _errorMessage = null;
       _imageUrl = null;
     });
-  try {
-    String url;
-    http.Response response;
-    if (_animalType == PhotoType.dog) {
-      url = 'https://dog.ceo/api/breeds/image/random';
-      response = await http.get(Uri.parse(url));
-      Map<String,dynamic> data = jsonDecode(
-        response.body,);
+    try {
+      String url;
+      http.Response response;
+      if (_animalType == PhotoType.dog) {
+        url =
+            'https://dog.ceo/api/breeds/image/random';
+        response = await http.get(Uri.parse(url));
+        Map<String, dynamic> data = jsonDecode(
+          response.body,
+        );
         _imageUrl = data['message'];
-    } else {
-      final random = 
-          DateTime.now().millisecondsSinceEpoch;
-          _imageUrl = 'https://picsum.photos/seed/$random/800/800';
+      } else {
+        final random =
+            DateTime.now().millisecondsSinceEpoch;
+        _imageUrl =
+            'https://picsum.photos/seed/$random/800/800';
+      }
+    } catch (e) {
+      _errorMessage =
+          'Не удалось загрузить фото. \nПроверьте подключение к интернету.';
     }
-  } catch (e) {
-    _errorMessage = 'Не удалось загрузить фото. \nПроверьте подключение к интернету.';
+    setState(() {
+      _isLoading = false;
+    });
   }
-  setState(() {
-    _isLoading = false;
-  });
-  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,16 +58,17 @@ class _PhotoPageState extends State<PhotoPage> {
       ),
       body: Column(
         children: [
-          const SizedBox(height:20),
-          _buildAnimaltoggle(),
-          const SizedBox(height:20),
-          _buildcContent(),
-          const SizedBox(height:20),
+          const SizedBox(height: 20),
+          _buildAnimalToggle(),
+          const SizedBox(height: 20),
+          _buildContent(),
+          const SizedBox(height: 20),
           _buildButton(),
         ],
       ),
     );
   }
+
   Widget _buildAnimalToggle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -81,24 +89,29 @@ class _PhotoPageState extends State<PhotoPage> {
         const SizedBox(width: 12),
         ChoiceChip(
           label: const Text('� Пейзаж'),
-          selected: _animalType == PhotoType.landscapes,
+          selected:
+              _animalType == PhotoType.landscapes,
           onSelected: (selected) {
             if (selected) {
               setState(() {
-                _animalType = PhotoType.landscapes;
+                _animalType =
+                    PhotoType.landscapes;
                 _imageUrl = null;
                 _errorMessage = null;
               });
             }
-          })
+          },
+        ),
       ],
     );
   }
+
   Widget _buildContent() {
     if (_isLoading) {
       return const Expanded(
-        child: Center(child: CircularProgressIndicator()),
-
+        child: Center(
+          child: CircularProgressIndicator(),
+        ),
       );
     }
     if (_errorMessage != null) {
@@ -106,13 +119,13 @@ class _PhotoPageState extends State<PhotoPage> {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child; Text(
+            child: Text(
               _errorMessage!,
               textAlign: TextAlign.center,
-              style: const TextStyled(
+              style: const TextStyle(
                 fontSize: 16,
                 color: Colors.red,
-              )
+              ),
             ),
           ),
         ),
@@ -122,10 +135,12 @@ class _PhotoPageState extends State<PhotoPage> {
     if (_imageUrl != null) {
       return Expanded(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 16,
           ),
           child: ClipRRect(
-            borderRadius: BorderRadiusGeometry.circular(16),
+            borderRadius:
+                BorderRadiusGeometry.circular(16),
             child: Image.network(
               _imageUrl!,
               fit: BoxFit.cover,
@@ -144,6 +159,26 @@ class _PhotoPageState extends State<PhotoPage> {
             fontSize: 18,
             color: Colors.grey,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton() {
+    String label = _animalType == PhotoType.dog
+        ? '� Новая собака'
+        : '� Новый пейзаж';
+
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _fetchPhoto,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 24,
+          vertical: 12,
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(fontSize: 16),
         ),
       ),
     );
